@@ -47,8 +47,8 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     
-    // 权限请求
-    implementation("com.permissionx.guolindev:permissionx:1.7.1")
+    // 权限请求 - 暂时注释，JitPack 仓库在 CI 中可能有解析问题
+    // implementation("com.permissionx.guolindev:permissionx:1.7.1")
 
     // 网络请求 - 用于调用豆包AI API
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
