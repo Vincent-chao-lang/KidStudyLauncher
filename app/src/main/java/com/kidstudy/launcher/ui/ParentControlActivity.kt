@@ -1,15 +1,18 @@
 package com.kidstudy.launcher.ui
 
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.widget.CheckBox
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.kidstudy.launcher.R
 import com.kidstudy.launcher.utils.Constants
 import com.kidstudy.launcher.utils.isAccessibilityServiceEnabled
-import com.permissionx.guolindev.PermissionX
 import com.kidstudy.launcher.service.KioskAccessibilityService
 
 class ParentControlActivity : AppCompatActivity() {
@@ -46,23 +49,31 @@ class ParentControlActivity : AppCompatActivity() {
 
     // 申请权限
     private fun requestPermissions() {
-        PermissionX.init(this)
-            .permissions(
-                android.Manifest.permission.WRITE_SETTINGS,
-                android.Manifest.permission.SYSTEM_ALERT_WINDOW
-            )
-            .request { allGranted, _, _ ->
-                if (allGranted) {
-                    // 引导开启无障碍服务
-                    if (!isAccessibilityServiceEnabled(this, KioskAccessibilityService::class.java)) {
-                        startActivity(Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                    }
-                    // 引导开启使用情况访问权限
-                    if (!hasUsageStatsPermission()) {
-                        startActivity(Intent("android.settings.USAGE_ACCESS_SETTINGS"))
-                    }
-                }
-            }
+        // 检查并引导开启系统设置权限
+        if (!Settings.System.canWrite(this)) {
+            Toast.makeText(this, "请授予系统设置权限", Toast.LENGTH_LONG).show()
+            val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
+            intent.data = Uri.parse("package:$packageName")
+            startActivity(intent)
+        }
+
+        // 检查并引导开启悬浮窗权限
+        if (!Settings.canDrawOverlays(this)) {
+            Toast.makeText(this, "请授予悬浮窗权限", Toast.LENGTH_LONG).show()
+            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+            intent.data = Uri.parse("package:$packageName")
+            startActivity(intent)
+        }
+
+        // 引导开启无障碍服务
+        if (!isAccessibilityServiceEnabled(this, KioskAccessibilityService::class.java)) {
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        }
+
+        // 引导开启使用情况访问权限
+        if (!hasUsageStatsPermission()) {
+            startActivity(Intent("android.settings.USAGE_ACCESS_SETTINGS"))
+        }
     }
 
     // 加载已安装应用

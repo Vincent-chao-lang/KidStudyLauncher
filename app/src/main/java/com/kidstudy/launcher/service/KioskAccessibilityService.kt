@@ -7,8 +7,6 @@ import android.view.accessibility.AccessibilityEvent
 import com.kidstudy.launcher.MyApplication
 import com.kidstudy.launcher.ui.PasswordVerifyActivity
 import com.kidstudy.launcher.utils.Constants
-import android.view.accessibility.AccessibilityEvent
-import com.kidstudy.launcher.utils.Constants
 
 class KioskAccessibilityService : AccessibilityService() {
 

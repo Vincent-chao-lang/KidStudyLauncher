@@ -16,8 +16,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.logging.HttpLoggingInterceptor
-import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import java.util.Locale
@@ -47,11 +45,7 @@ class AITutorActivity : AppCompatActivity() {
     private val TIMEOUT_SECONDS = 30L
 
     private val client: OkHttpClient by lazy {
-        val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
         OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
             .build()
     }
 
