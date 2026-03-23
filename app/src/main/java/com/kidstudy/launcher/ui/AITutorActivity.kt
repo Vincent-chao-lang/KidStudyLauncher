@@ -16,6 +16,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import java.util.Locale
@@ -167,16 +168,15 @@ class AITutorActivity : AppCompatActivity() {
                     "4. 用温暖友善的语气交流")
 
             // 对话消息
-            val messages = JSONArray().apply {
-                put(JSONObject().apply {
-                    put("role", "system")
-                    put("content", "你是一个儿童学习辅导老师，名字叫小豆。回答要简单易懂，适合3-10岁孩子理解，语言生动有趣。")
-                })
-                put(JSONObject().apply {
-                    put("role", "user")
-                    put("content", question)
-                })
-            }
+            val messages = JSONArray()
+            messages.put(JSONObject().apply {
+                put("role", "system")
+                put("content", "你是一个儿童学习辅导老师，名字叫小豆。回答要简单易懂，适合3-10岁孩子理解，语言生动有趣。")
+            })
+            messages.put(JSONObject().apply {
+                put("role", "user")
+                put("content", question)
+            })
             put("messages", messages)
 
             // 参数设置

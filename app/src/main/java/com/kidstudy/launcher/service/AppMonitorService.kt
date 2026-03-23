@@ -51,9 +51,8 @@ class AppMonitorService : Service() {
 
         val foregroundApp = getForegroundPackageName()
         if (foregroundApp != null && !whiteList.contains(foregroundApp)) {
-            // 强制关闭非白名单应用
-            activityManager.forceStopPackage(foregroundApp)
-            Log.d("AppMonitor", "强制关闭：$foregroundApp")
+            // 注意：强制关闭应用需要系统权限，这里只记录日志
+            Log.d("AppMonitor", "检测到非白名单应用：$foregroundApp")
         }
     }
 
