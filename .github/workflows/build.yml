@@ -5,8 +5,6 @@ on:
     branches: [ main ]
     tags:
       - 'v*.*.*'
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -25,92 +23,27 @@ jobs:
 
     - name: 安装 Gradle
       run: |
-        wget https://services.gradle.org/distributions/gradle-8.0-bin.zip
+        wget -q https://services.gradle.org/distributions/gradle-8.0-bin.zip
         unzip -q gradle-8.0-bin.zip
         echo "$GITHUB_WORKSPACE/gradle-8.0/bin" >> $GITHUB_PATH
 
-    - name: 生成版本号
-      id: version
+    - name: 构建Debug APK
       run: |
-        if [[ $GITHUB_REF == refs/tags/* ]]; then
-          VERSION=${GITHUB_REF#refs/tags/}
-        else
-          VERSION="v1.0.0-$(date +'%Y%m%d-%H%M')-SNAPSHOT"
-        fi
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-        echo "version_name=$VERSION" >> $GITHUB_OUTPUT
-
-    - name: 构建 Debug APK
-      run: gradle --no-daemon --stacktrace assembleDebug
-
-    - name: 构建 Release APK
-      run: gradle --no-daemon --stacktrace assembleRelease
-
-    - name: 准备 Release 文件
-      run: |
+        gradle --no-daemon assembleDebug
         mkdir -p release
-        cp app/build/outputs/apk/debug/app-debug.apk release/KidStudyLauncher-${{ steps.version.outputs.version }}-debug.apk
-        cp app/build/outputs/apk/release/app-release-unsigned.apk release/KidStudyLauncher-${{ steps.version.outputs.version }}-release-unsigned.apk
+        cp app/build/outputs/apk/debug/app-debug.apk release/
 
-    - name: 上传 Debug APK
+    - name: 上传APK
       uses: actions/upload-artifact@v4
       with:
         name: app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
-        retention-days: 30
+        path: release/app-debug.apk
 
-    - name: 上传 Release APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-release
-        path: app/build/outputs/apk/release/app-release-unsigned.apk
-        retention-days: 30
-
-    - name: 创建 GitHub Release
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    - name: 创建Release
+      if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: |
-          release/KidStudyLauncher-${{ steps.version.outputs.version }}-debug.apk
-          release/KidStudyLauncher-${{ steps.version.outputs.version }}-release-unsigned.apk
+        files: release/app-debug.apk
         generate_release_notes: true
-        name: ${{ steps.version.outputs.version_name }}
-        body: |
-          ## 🎉 KidStudyLauncher ${{ steps.version.outputs.version }}
-
-          ### 📱 下载说明
-          | 文件 | 说明 |
-          |------|------|
-          | `KidStudyLauncher-${{ steps.version.outputs.version }}-debug.apk` | 调试版本，推荐用于测试 |
-          | `KidStudyLauncher-${{ steps.version.outputs.version }}-release-unsigned.apk` | 发布版本（未签名，需自行签名） |
-
-          ### ✨ 主要功能
-          - 🏠 儿童桌面启动器
-          - 📋 应用白名单控制
-          - 🤖 AI 智能辅导（需配置豆包 API Key）
-          - 🔐 家长密码保护
-          - 📺 沉浸式全屏模式
-          - 🎚️ 音量键唤醒家长验证
-
-          ### 🔧 配置说明
-          首次使用需要：
-          1. 设置家长密码
-          2. 勾选允许的应用
-          3. 开启无障碍服务
-          4. 配置豆包 AI API Key
-
-          ### 📋 权限说明
-          - 无障碍服务：拦截系统按键
-          - 使用情况访问：监控应用使用
-          - 系统设置权限：修改系统设置
-          - 悬浮窗权限：显示辅助窗口
-          - 网络权限：调用 AI API
-
-          ---
-          [完整文档](https://github.com/Vincent-chao-lang/KidStudyLauncher)
-
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: 构建成功
-      run: echo "🎉 Android 构建成功！版本: ${{ steps.version.outputs.version }}"
