@@ -63,6 +63,10 @@ class KidLauncherActivity : AppCompatActivity() {
         // 清空原有图标
         gridLayout.removeAllViews()
 
+        // 检查是否已设置密码
+        val hasPassword = !getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE)
+            .getString(Constants.SP_KEY_PASSWORD, null).isNullOrEmpty()
+
         // 遍历白名单，添加图标
         whiteList.forEach { pkgName ->
             val appInfo = packageManager.getApplicationInfo(pkgName, 0)
@@ -94,6 +98,22 @@ class KidLauncherActivity : AppCompatActivity() {
             startActivity(Intent(this, AITutorActivity::class.java))
         }
         gridLayout.addView(aiItemView)
+
+        // 添加家长控制入口（长按进入）
+        val settingsItemView = layoutInflater.inflate(R.layout.item_app_icon, gridLayout, false)
+        settingsItemView.findViewById<ImageView>(R.id.iv_app_icon).setImageResource(android.R.drawable.ic_menu_preferences)
+        settingsItemView.findViewById<TextView>(R.id.tv_app_name).text = "家长控制"
+        settingsItemView.setOnClickListener {
+            // 长按3秒后进入家长控制
+            it.postDelayed({
+                startActivity(Intent(this, ParentControlActivity::class.java))
+            }, 3000)
+        }
+        settingsItemView.setOnLongClickListener {
+            startActivity(Intent(this, ParentControlActivity::class.java))
+            true
+        }
+        gridLayout.addView(settingsItemView)
     }
 
     // 屏蔽返回键

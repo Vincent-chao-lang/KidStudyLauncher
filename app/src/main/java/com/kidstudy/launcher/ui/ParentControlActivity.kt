@@ -28,6 +28,16 @@ class ParentControlActivity : AppCompatActivity() {
 
         llAppList = findViewById(R.id.ll_app_list)
 
+        // 检查是否已设置密码
+        val hasPassword = !getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE)
+            .getString(Constants.SP_KEY_PASSWORD, null).isNullOrEmpty()
+
+        if (!hasPassword) {
+            Toast.makeText(this, "请先设置家长密码", Toast.LENGTH_LONG).show()
+            startActivity(Intent(this, SetPasswordActivity::class.java))
+            return
+        }
+
         // 申请必要权限
         requestPermissions()
 
@@ -37,13 +47,16 @@ class ParentControlActivity : AppCompatActivity() {
         // 保存白名单按钮
         findViewById<View>(R.id.btn_save).setOnClickListener {
             saveWhiteList()
+            Toast.makeText(this, "白名单已保存", Toast.LENGTH_SHORT).show()
             // 启动儿童桌面
             startActivity(Intent(this, KidLauncherActivity::class.java))
+            finish()
         }
 
         // 设置密码按钮
         findViewById<View>(R.id.btn_set_pwd).setOnClickListener {
-            startActivity(Intent(this, SetPasswordActivity::class.java))
+            // 先验证当前密码
+            startActivity(Intent(this, PasswordVerifyActivity::class.java))
         }
     }
 
