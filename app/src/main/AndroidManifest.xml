@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <!-- 声明无障碍服务 -->
     <application
@@ -47,6 +48,18 @@
         <!-- 密码验证页面 -->
         <activity
             android:name=".ui.PasswordVerifyActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- 设置密码页面 -->
+        <activity
+            android:name=".ui.SetPasswordActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- AI辅导页面 -->
+        <activity
+            android:name=".ui.AITutorActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 
