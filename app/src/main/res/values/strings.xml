@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">儿童AI学习桌面</string>
+    <string name="accessibility_service_desc">开启后可屏蔽按键，保护孩子学习环境</string>
+    <string name="btn_save">保存白名单</string>
+    <string name="btn_set_pwd">设置家长密码</string>
+    <string name="btn_send">发送问题</string>
+    <string name="hint_question">请输入想提问的问题...</string>
+    <string name="title_ai_tutor">豆包AI辅导</string>
+    <string name="title_parent_control">家长控制中心</string>
+    <string name="title_password_verify">请输入家长密码</string>
+    <string name="title_set_password">设置家长密码</string>
+    <string name="hint_password">请输入4-6位数字密码</string>
+    <string name="hint_confirm_password">请确认密码</string>
+    <string name="toast_password_not_match">两次密码不一致</string>
+    <string name="toast_password_set_success">密码设置成功</string>
+    <string name="toast_password_error">密码错误</string>
+</resources>

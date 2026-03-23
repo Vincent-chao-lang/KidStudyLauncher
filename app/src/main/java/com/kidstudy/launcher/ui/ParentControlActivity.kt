@@ -1,0 +1,129 @@
+package com.kidstudy.launcher.ui
+
+import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import android.widget.CheckBox
+import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatActivity
+import com.kidstudy.launcher.R
+import com.kidstudy.launcher.utils.Constants
+import com.kidstudy.launcher.utils.isAccessibilityServiceEnabled
+import com.permissionx.guolindev.PermissionX
+import com.kidstudy.launcher.service.KioskAccessibilityService
+
+class ParentControlActivity : AppCompatActivity() {
+
+    private lateinit var llAppList: LinearLayout
+    private val installedApps = mutableListOf<AppInfo>()
+
+    data class AppInfo(val pkgName: String, val name: String, val isChecked: Boolean = false)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_parent_control)
+
+        llAppList = findViewById(R.id.ll_app_list)
+
+        // 申请必要权限
+        requestPermissions()
+
+        // 加载已安装应用
+        loadInstalledApps()
+
+        // 保存白名单按钮
+        findViewById<View>(R.id.btn_save).setOnClickListener {
+            saveWhiteList()
+            // 启动儿童桌面
+            startActivity(Intent(this, KidLauncherActivity::class.java))
+        }
+
+        // 设置密码按钮
+        findViewById<View>(R.id.btn_set_pwd).setOnClickListener {
+            startActivity(Intent(this, SetPasswordActivity::class.java))
+        }
+    }
+
+    // 申请权限
+    private fun requestPermissions() {
+        PermissionX.init(this)
+            .permissions(
+                android.Manifest.permission.WRITE_SETTINGS,
+                android.Manifest.permission.SYSTEM_ALERT_WINDOW
+            )
+            .request { allGranted, _, _ ->
+                if (allGranted) {
+                    // 引导开启无障碍服务
+                    if (!isAccessibilityServiceEnabled(this, KioskAccessibilityService::class.java)) {
+                        startActivity(Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                    }
+                    // 引导开启使用情况访问权限
+                    if (!hasUsageStatsPermission()) {
+                        startActivity(Intent("android.settings.USAGE_ACCESS_SETTINGS"))
+                    }
+                }
+            }
+    }
+
+    // 加载已安装应用
+    private fun loadInstalledApps() {
+        val pm = packageManager
+        val intent = Intent(Intent.ACTION_MAIN, null).apply {
+            addCategory(Intent.CATEGORY_LAUNCHER)
+        }
+        val resolveInfos = pm.queryIntentActivities(intent, 0)
+
+        // 读取已保存的白名单
+        val savedWhiteList = getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE)
+            .getStringSet(Constants.SP_KEY_WHITE_LIST, mutableSetOf()) ?: mutableSetOf()
+
+        // 解析应用信息
+        resolveInfos.forEach {
+            val pkgName = it.activityInfo.packageName
+            val name = it.loadLabel(pm).toString()
+            installedApps.add(AppInfo(pkgName, name, savedWhiteList.contains(pkgName)))
+        }
+
+        // 渲染应用列表（带复选框）
+        installedApps.forEach { app ->
+            val checkBox = CheckBox(this).apply {
+                text = app.name
+                isChecked = app.isChecked
+                tag = app.pkgName
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            }
+            llAppList.addView(checkBox)
+        }
+    }
+
+    // 保存白名单
+    private fun saveWhiteList() {
+        val whiteList = mutableSetOf<String>()
+        for (i in 0 until llAppList.childCount) {
+            val checkBox = llAppList.getChildAt(i) as CheckBox
+            if (checkBox.isChecked) {
+                whiteList.add(checkBox.tag.toString())
+            }
+        }
+        // 保存到SP
+        getSharedPreferences(Constants.SP_NAME, MODE_PRIVATE)
+            .edit()
+            .putStringSet(Constants.SP_KEY_WHITE_LIST, whiteList)
+            .apply()
+    }
+
+    // 检查使用情况访问权限
+    private fun hasUsageStatsPermission(): Boolean {
+        val usageStatsManager = getSystemService(USAGE_STATS_SERVICE) as android.app.usage.UsageStatsManager
+        val now = System.currentTimeMillis()
+        val stats = usageStatsManager.queryUsageStats(
+            android.app.usage.UsageStatsManager.INTERVAL_DAILY,
+            now - 1000 * 3600,
+            now
+        )
+        return stats != null && stats.isNotEmpty()
+    }
+}
