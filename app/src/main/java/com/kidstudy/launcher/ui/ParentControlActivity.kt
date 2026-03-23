@@ -12,7 +12,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.kidstudy.launcher.R
 import com.kidstudy.launcher.utils.Constants
-import com.kidstudy.launcher.utils.isAccessibilityServiceEnabled
+import com.kidstudy.launcher.utils.ServiceUtils
 import com.kidstudy.launcher.service.KioskAccessibilityService
 
 class ParentControlActivity : AppCompatActivity() {
@@ -66,7 +66,7 @@ class ParentControlActivity : AppCompatActivity() {
         }
 
         // 引导开启无障碍服务
-        if (!isAccessibilityServiceEnabled(this, KioskAccessibilityService::class.java)) {
+        if (!ServiceUtils.isAccessibilityServiceEnabled(this, KioskAccessibilityService::class.java)) {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
 
