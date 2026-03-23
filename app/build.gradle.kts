@@ -9,12 +9,17 @@ android {
 
     defaultConfig {
         applicationId = "com.kidstudy.launcher"
-        minSdk = 26
+        minSdk = 21  // 降低到Android 5.0以兼容更多设备
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 4
+        versionName = "1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // 支持多种CPU架构（包括模拟器）
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+        }
     }
 
     buildTypes {
@@ -37,6 +42,13 @@ android {
     }
     buildFeatures {
         viewBinding = true // 开启ViewBinding
+    }
+
+    // 生成包含所有架构的通用APK（用于模拟器兼容）
+    splits {
+        abi {
+            isEnable = false // 禁用ABI拆分，生成通用APK
+        }
     }
 }
 
